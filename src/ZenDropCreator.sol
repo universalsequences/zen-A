@@ -45,8 +45,9 @@ contract ZenDropCreator {
                                '{"description": "Birth of a universe", "name": "Zen A", "image": "https://zequencer.mypinata.cloud/ipfs/QmcLbLqjVxTUXFVbrVeXJPKKdXGbdr1TNHEK3ahKHzzSoF/1"}')))))));
 
         // defaultAdmin will be the "ZporeMinter"
-        address newDropAddress = IZoraNFTCreator(address(0xb9583D05Ba9ba8f7F14CCEe3Da10D2bc0A72f519)).setupDropsContract(
-          "Zen 1",
+        address ZORA_DROPS_CREATOR = address(0xEf440fbD719cC5c3dDCD33b6f9986Ab3702E97A5);
+        address newDropAddress = IZoraNFTCreator(ZORA_DROPS_CREATOR).setupDropsContract(
+          "Zen 123",
           "ZEN",
           address(this),
           1000000000000, // unlimited?

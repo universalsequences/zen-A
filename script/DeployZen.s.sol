@@ -4,6 +4,7 @@
 pragma solidity >=0.8.0 <0.9.0;
 import "forge-std/Script.sol";
 import "../src/CompressedLibrary.sol";
+import "../src/CompressedShader.sol";
 import "../src/CompressedDSP.sol";
 import "../src/CompressedParameterNames.sol";
 import "../src/CompressedParameterValues.sol";
@@ -20,11 +21,12 @@ contract DeployZen is Script {
     CompressedDSP dsp = new CompressedDSP();
     CompressedParameterNames  names = new CompressedParameterNames();
     CompressedParameterValues values = new CompressedParameterValues();
+    CompressedShader shader = new CompressedShader();
     ZenMetadataRenderer metadataRenderer = new ZenMetadataRenderer(
-        address(lib), address(dsp), address(names), address(values));
+        address(lib), address(dsp), address(names), address(values), address(shader));
     ZenDropCreator creator = new ZenDropCreator();
     address drop = creator.newDrop(address(metadataRenderer));
-    IERC721Drop(drop).purchase{value:1554000000000000*100}(200);
+    IERC721Drop(drop).purchase{value:1554000000000000*0}(200);
     vm.stopBroadcast();
   }
 }

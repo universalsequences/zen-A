@@ -16,16 +16,18 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     address dspWrapper;
     address parameterNamesWrapper;
     address parameterValuesWrapper;
+    address shaderWrapper;
     string signature;
     string [2] scaleNames = ["mixolydian", "ukranian dorian"];
     string [2] scales = ["[0,2,4,5,7,9,10]", "[0,2,3,6,7,9,10]"];
 
 
-    constructor(address wrapper, address dsp, address namesWrapper, address valuesWrapper) {
+    constructor(address wrapper, address dsp, address namesWrapper, address valuesWrapper, address shader) {
         libraryWrapper = wrapper;
         dspWrapper = dsp;
         parameterNamesWrapper = namesWrapper;
         parameterValuesWrapper = valuesWrapper;
+        shaderWrapper = shader;
     }
 
 
@@ -143,7 +145,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             uint presetIndex = uint(keccak256(abi.encodePacked(tokenId, '-', i))) % parameterValues.length;
 
             if ( i % latchedWidth == 0) {
-                latched = tokenId <= 6 ? tokenId - 1 : presetIndex;
+                latched = tokenId <= 4 ? tokenId - 1 : presetIndex;
                 // 8 was good but lets try 3 to go even crazier
                 latchedWidth = (latchBase + (uint(keccak256(abi.encodePacked(tokenId, '-', i)))) % (parameterValues.length - 2));
             }
@@ -189,8 +191,8 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
             '<title>Music Generator</title>'
             '</head>'
-            '<body style="background-color: blue; display: flex;">'
-            '<div id="playButton" onclick="generateMusic()" style="position: absolute; z-index: 30; width: 0; height: 0; border-top: 30px solid transparent; border-bottom: 30px solid transparent; border-left: 60px solid #fff; margin: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>'
+            '<body style="background-color: white; display: flex; margin: 0">'
+            '<div id="playButton" onclick="generateMusic()" style="position: absolute; z-index: 30; width: 0; height: 0; border-top: 30px solid transparent; border-bottom: 30px solid transparent; border-left: 60px solid #E2E5DE; margin: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>'
             '<script>',
             ICompressed(libraryWrapper).uncompress(),
             ';let isPlaying = false;'
@@ -213,7 +215,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             'if (isPlaying) {'
                 'button.style.borderTop = "30px solid transparent";'
                 'button.style.borderBottom = "30px solid transparent";'
-                'button.style.borderLeft = "60px solid #fff";'
+                'button.style.borderLeft = "60px solid #E2E5DE";'
                 'button.style.width= "0";'
                 'button.style.height= "0";'
                 'button.style.borderRight = "0";'
@@ -222,8 +224,8 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                 'button.style.height= "80px";'
                 'button.style.borderTop = "0";'
                 'button.style.borderBottom = "0";'
-                'button.style.borderLeft = "30px solid #fff";'
-                'button.style.borderRight = "30px solid #fff";'
+                'button.style.borderLeft = "30px solid #E2E5DE";'
+                'button.style.borderRight = "30px solid #E2E5DE";'
             '}'
             'isPlaying = !isPlaying;\n'
             'let x = ',
@@ -243,11 +245,21 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                                     'gainNode.connect(compressor);\n'
                         'compressor.connect(ctxt.destination);\n'
                         'z.workletNode.connect(gainNode);\n'
-                    '});\n' 
+                             'workletNode.port.onmessage = (e) => {\n'
+                            'let {type, body} = e.data\n'
+                            'if (type === "kickEnv") {\n'
+                                'update("variable3", body*4);\n'
+                                '}\n'
+                                'if (type === "clapEnv") {\n'
+                                    'update("variable4", body);\n'
+                                                                   '}}});'
             '}\n'
             'gainNode.gain.setValueAtTime(isPlaying ? 2 : 0, ctxt.currentTime);\n'
             '}', // end of generate music func
+            ICompressed(shaderWrapper).uncompress(),
             '</script>',
+            '<canvas id="canvas" style="width: 100vw; height: 100vh;"></canvas>',
+
             '</body>',
             '</html>'
             );
