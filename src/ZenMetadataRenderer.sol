@@ -1,7 +1,7 @@
-
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 import './ICompressed.sol';
+import './SVG.sol';
 import './StringSplitter.sol';
 import {IMetadataRenderer} from "zora-drops-contracts/interfaces/IMetadataRenderer.sol";
 import './Base64.sol';
@@ -21,7 +21,6 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     string [2] scaleNames = ["mixolydian", "ukranian dorian"];
     string [2] scales = ["[0,2,4,5,7,9,10]", "[0,2,3,6,7,9,10]"];
 
-
     constructor(address wrapper, address dsp, address namesWrapper, address valuesWrapper, address shader) {
         libraryWrapper = wrapper;
         dspWrapper = dsp;
@@ -29,7 +28,6 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         parameterValuesWrapper = valuesWrapper;
         shaderWrapper = shader;
     }
-
 
     struct MetadataURIInfo {
         string contractURI;
@@ -56,10 +54,10 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
           Base64.encode(bytes(
             abi.encodePacked(
               "{",
-              "\"description\": \"testing open-sea.\", ", 
-              "\"image\": \"", generateSVG(), "\",",
+              "\"description\": \"Zen A by A.L.E.Z. Dynamically generated music, fully onchain. 2 shift-register sequencers fighting eachother, while strictly adhering to Jaki Leibezeit's dot dash system. Built with Zen. \", ", 
+              //"\"image\": \"", SVG.generateSVG(tokenId), "\",",
               getTraits(tokenId), ",",
-              "\"name\": \"ZEN!\", ", 
+              "\"name\": \"Zen A", Conversion.uint2str(tokenId), "\", ", 
               "\"animation_url\": \"",
 
             string(abi.encodePacked(
@@ -72,7 +70,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     }
 
     function getTraits(uint256 tokenId) public view returns (string memory) {
-        string memory scaleName = scaleNames[tokenId % 2];
+        string memory scaleName = scaleNames[tokenId == 1 ? 0 : tokenId % 2];
         string memory attr = string(abi.encodePacked(
             "\"attributes\": [{\"trait_type\": \"scale\", \"value\": \"", scaleName, "\"},"));
             
@@ -106,7 +104,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     }
 
     function getScale(uint256 tokenId) public view returns (string memory) {
-        return scales[tokenId % 2];
+        return scales[tokenId == 1 ? 0 : tokenId % 2];
     }
 
     function generateDSPCall(uint256 tokenId) public view returns (string memory) {
@@ -142,18 +140,16 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         uint count = 0;
         for (uint i=0; i < parameterNames.length; i++) {
             // Use the pseudorandom number to select a preset for this parameter
-            uint presetIndex = uint(keccak256(abi.encodePacked(tokenId, '-', i))) % parameterValues.length;
-
             if ( i % latchedWidth == 0) {
-                latched = tokenId <= 4 ? tokenId - 1 : presetIndex;
+                latched = tokenId <= 6 ? tokenId - 1 : (uint(keccak256(abi.encodePacked(tokenId, '-', i))) % parameterValues.length);
+
                 // 8 was good but lets try 3 to go even crazier
-                latchedWidth = (latchBase + (uint(keccak256(abi.encodePacked(tokenId, '-', i)))) % (parameterValues.length - 2));
+                latchedWidth = (latchBase + (uint(keccak256(abi.encodePacked(tokenId, '-', i)))) % 15);
             }
             arr[i] = parameterValues[latched%parameterValues.length][i];
             counts[latched%parameterValues.length]++;
             count++;
         }
-
         string [] memory stats = new string[](parameterValues.length);
         for (uint i=0; i < parameterValues.length; i++) {
             uint avg = 100*counts[i] / count;
@@ -163,15 +159,6 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
         return (arr, stats);
     }
 
-    function generateSVG() public view returns (string memory) {
-        string memory svg = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1080" height="1080" viewBox="0 0 1080 1080" xml:space="preserve">',
-            '<rect x="0" y="0" width="100%" height="100%" fill="transparent"/>',
-            '<rect x="-540" y="-540" rx="0" ry="0" width="1080" height="1080" fill="black"/>'
-            '</svg>'
-                                                    ));
-        return string(abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(abi.encodePacked(svg))));
-    }
-
     function generateMyPage(uint256 tokenId) external view returns (string memory) {
         return string(abi.encodePacked(
             "data:text/html;base64,",
@@ -179,10 +166,6 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     }
 
     function generateHTML(uint256 tokenId) public view returns (string memory) {
-        /*
-            part1 = string(abi.encodePacked(
-            "data:text/html;base64,",
-        */
         bytes memory part1;
         {
             part1 = abi.encodePacked(
@@ -192,7 +175,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             '<title>Music Generator</title>'
             '</head>'
             '<body style="background-color: white; display: flex; margin: 0">'
-            '<div id="playButton" onclick="generateMusic()" style="position: absolute; z-index: 30; width: 0; height: 0; border-top: 30px solid transparent; border-bottom: 30px solid transparent; border-left: 60px solid #E2E5DE; margin: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>'
+            '<div id="playButton" style="position: absolute; z-index: 30; width: 0; height: 0; border-top: 30px solid transparent; border-bottom: 30px solid transparent; border-left: 60px solid #E2E5DE; margin: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>'
             '<script>',
             ICompressed(libraryWrapper).uncompress(),
             ';let isPlaying = false;'
@@ -230,15 +213,15 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             'isPlaying = !isPlaying;\n'
             'let x = ',
                                         generateDSPCall(tokenId),
-                                        ';\nlet ctxt = new (window.AudioContext || window.webkitAudioContext)();\n'
+                                        ';\nlet ctxt = new (window.AudioContext || window.webkitAudioContext)({sampleRate:44100});\n'
             'if (!gainNode) gainNode  = ctxt.createGain(); \n'
             'if (ctxt.state === "suspended") {\n txt.resume();\n}\n'
             'if (!workletNode) {\n'
                 'createWorklet(ctxt, zen(x)).then(z => {\n'
                         'workletNode = z.workletNode;\n'
                         'const compressor = ctxt.createDynamicsCompressor();\n'
-                        'compressor.threshold.value = -10;  \n'
-                         'compressor.knee.value = 1;  \n'
+                        'compressor.threshold.value = -11;  \n'
+                         'compressor.knee.value = 2;  \n'
                           'compressor.ratio.value = 3;  \n'
 'compressor.attack.value = 0.001;  \n'
 'compressor.release.value = 0.25;\n'
@@ -247,19 +230,23 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                         'z.workletNode.connect(gainNode);\n'
                              'workletNode.port.onmessage = (e) => {\n'
                             'let {type, body} = e.data\n'
-                            'if (type === "kickEnv") {\n'
-                                'update("variable3", body*4);\n'
-                                '}\n'
+'if (type === "bitA") {\n'
+'    updateBit1(body);\n'
+'}\n'
+'if (type === "bit") {\n'
+'    updateBit2(body);\n'
+'}\n'
+
                                 'if (type === "clapEnv") {\n'
-                                    'update("variable4", body);\n'
+                                    'update("clapEnv", body*0.075);\n'
                                                                    '}}});'
             '}\n'
-            'gainNode.gain.setValueAtTime(isPlaying ? 2 : 0, ctxt.currentTime);\n'
-            '}', // end of generate music func
+            'gainNode.gain.setValueAtTime(isPlaying ? 1.25 : 0, ctxt.currentTime);\n'
+            '}\n', // end of generate music func
+                  'const NUMERATOR = 1.0 + (', Conversion.uint2str(uint(keccak256(abi.encodePacked(tokenId))) % 100), ');\n',
+                                             'const DENOMINATOR = 102.0;\n',
             ICompressed(shaderWrapper).uncompress(),
             '</script>',
-            '<canvas id="canvas" style="width: 100vw; height: 100vh;"></canvas>',
-
             '</body>',
             '</html>'
             );
