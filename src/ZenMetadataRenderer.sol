@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 import './ICompressed.sol';
@@ -21,6 +22,35 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
     string [2] scaleNames = ["mixolydian", "ukranian dorian"];
     string [2] scales = ["[0,2,4,5,7,9,10]", "[0,2,3,6,7,9,10]"];
 
+    string [3][25] colorSchemes = [
+                                  ["0.52, 0.47, 0.47, 1.0", "0.37, 0.21, 0.21, 1.0", "1.0, 0.07, 0.09, 1.0"],
+                                  ["0.12, 0.17, 0.17, 1.0", "0.21, 0.21, 0.37, 1.0", "0.3, 0.37, 1.0, 1.0"],
+                                  ["0.69, 0.6, 0.6, 1.0", "0.42, 0.49, 0.49, 1.0", "0.22, 0.97, 0.27, 1.0"],
+                                  ["0.37, 0.21, 0.21, 1.0", "0.49, 0.49, 0.49, 1.0", "0.98, 0.94, 0.07, 1.0"],
+                                  ["0.15, 0.13, 0.01, 1.0", "0.37, 0.41, 0.73, 1.0", "0.98, 0.08, 0.81, 1.0"],
+                                   ["0.30, 0.27, 0.25, 1.0", "0.28, 0.25, 0.23, 1.0", "0.95, 0.20, 0.25, 1.0"],
+    ["0.22, 0.20, 0.18, 1.0", "0.20, 0.18, 0.17, 1.0", "0.25, 0.90, 0.35, 1.0"],
+    ["0.28, 0.27, 0.26, 1.0", "0.25, 0.23, 0.22, 1.0", "0.10, 0.50, 0.95, 1.0"],
+    ["0.27, 0.25, 0.24, 1.0", "0.25, 0.23, 0.21, 1.0", "0.95, 0.60, 0.10, 1.0"],
+    ["0.25, 0.23, 0.21, 1.0", "0.22, 0.21, 0.20, 1.0", "0.15, 0.95, 0.60, 1.0"],
+    ["0.28, 0.27, 0.26, 1.0", "0.26, 0.24, 0.23, 1.0", "0.85, 0.10, 0.60, 1.0"],
+    ["0.29, 0.28, 0.26, 1.0", "0.27, 0.26, 0.25, 1.0", "0.45, 0.15, 0.95, 1.0"],
+    ["0.27, 0.26, 0.25, 1.0", "0.24, 0.23, 0.22, 1.0", "0.10, 0.70, 0.25, 1.0"],
+    ["0.30, 0.28, 0.27, 1.0", "0.28, 0.27, 0.25, 1.0", "0.55, 0.30, 0.95, 1.0"],
+    ["0.27, 0.26, 0.25, 1.0", "0.26, 0.25, 0.23, 1.0", "0.05, 0.80, 0.70, 1.0"],
+    ["0.30, 0.28, 0.27, 1.0", "0.27, 0.26, 0.25, 1.0", "0.95, 0.45, 0.30, 1.0"],
+    ["0.28, 0.27, 0.25, 1.0", "0.26, 0.24, 0.23, 1.0", "0.70, 0.10, 0.85, 1.0"],
+    ["0.29, 0.28, 0.26, 1.0", "0.27, 0.26, 0.24, 1.0", "0.35, 0.95, 0.20, 1.0"],
+    ["0.27, 0.25, 0.24, 1.0", "0.25, 0.24, 0.23, 1.0", "0.20, 0.60, 0.90, 1.0"],
+    ["0.28, 0.27, 0.26, 1.0", "0.27, 0.26, 0.25, 1.0", "0.95, 0.85, 0.15, 1.0"],
+    ["0.29, 0.28, 0.27, 1.0", "0.28, 0.27, 0.26, 1.0", "0.10, 0.30, 0.95, 1.0"],
+    ["0.28, 0.27, 0.26, 1.0", "0.26, 0.24, 0.23, 1.0", "0.80, 0.15, 0.75, 1.0"],
+    ["0.27, 0.25, 0.24, 1.0", "0.25, 0.23, 0.22, 1.0", "0.65, 0.95, 0.10, 1.0"],
+    ["0.30, 0.29, 0.27, 1.0", "0.28, 0.26, 0.25, 1.0", "0.40, 0.25, 0.90, 1.0"],
+    ["0.29, 0.27, 0.26, 1.0", "0.27, 0.26, 0.24, 1.0", "0.15, 0.75, 0.55, 1.0"]
+
+                                  ];
+
     constructor(address wrapper, address dsp, address namesWrapper, address valuesWrapper, address shader) {
         libraryWrapper = wrapper;
         dspWrapper = dsp;
@@ -35,6 +65,20 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
 
     /// @notice NFT metadata by contract
     mapping(address => MetadataURIInfo) public metadataBaseByContract;
+
+    function getColorScheme(uint256 tokenId) public view returns (string[3] memory ) {
+        uint colorId = uint(uint(keccak256(abi.encodePacked(tokenId))) % colorSchemes.length);
+        return colorSchemes[colorId];
+    }
+
+    function generateColorScheme(uint256 tokenId) public view returns (string memory) {
+        uint colorId = uint(uint(keccak256(abi.encodePacked(tokenId))) % colorSchemes.length);
+        return string(
+            abi.encodePacked(
+                "const color1 = \"", colorSchemes[colorId][0], "\";\n",
+                "const color2 = \"", colorSchemes[colorId][1], "\";\n",
+                "const color3 = \"", colorSchemes[colorId][2], "\";\n"));
+    }
 
     function getParameterNames() public view returns (string [] memory) {
         return StringSplitter.split(ICompressed(parameterNamesWrapper).uncompress(), ",");
@@ -55,7 +99,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             abi.encodePacked(
               "{",
               "\"description\": \"Zen A by A.L.E.Z. Dynamically generated music, fully onchain. 2 shift-register sequencers fighting eachother, while strictly adhering to Jaki Leibezeit's dot dash system. Built with Zen. \", ", 
-              //"\"image\": \"", SVG.generateSVG(tokenId), "\",",
+              //"\"image\": \"", SVG.generateSVG(tokenId, getColorScheme(tokenId)), "\",",
               getTraits(tokenId), ",",
               "\"name\": \"Zen A", Conversion.uint2str(tokenId), "\", ", 
               "\"animation_url\": \"",
@@ -67,6 +111,18 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                                                    
               "}"
                              )))));
+    }
+
+    function generateFloatVariable(string memory name, uint256 tokenId) public view returns (string memory) {
+        uint num = 1 + uint(uint(keccak256(abi.encodePacked(tokenId))) % 100);
+        return string(abi.encodePacked(
+                                       "const ", name, " = ", Conversion.uint2str(num), "/ 101.0;"));
+    }
+
+    function generateIntVariable(string memory name, uint256 tokenId, uint256 max) public view returns (string memory) {
+        uint num = uint(uint(keccak256(abi.encodePacked(tokenId))) % max);
+        return string(abi.encodePacked(
+                                       "const ", name, " = \"", Conversion.uint2str(num), ".0\";"));
     }
 
     function getTraits(uint256 tokenId) public view returns (string memory) {
@@ -134,7 +190,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
 
         uint latchedWidth = 1; 
 
-        uint latchBase = 13 - (tokenId < 100 ? (tokenId / 8) : 12);
+        uint latchBase = (tokenId < 10 ? 13 : 24) - (tokenId < 100 ? (tokenId / 8) : 12);
 
         uint [] memory counts = new uint[](parameterValues.length);
         uint count = 0;
@@ -215,7 +271,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                                         generateDSPCall(tokenId),
                                         ';\nlet ctxt = new (window.AudioContext || window.webkitAudioContext)({sampleRate:44100});\n'
             'if (!gainNode) gainNode  = ctxt.createGain(); \n'
-            'if (ctxt.state === "suspended") {\n txt.resume();\n}\n'
+            'if (ctxt.state === "suspended") {\n ctxt.resume();\n}\n'
             'if (!workletNode) {\n'
                 'createWorklet(ctxt, zen(x)).then(z => {\n'
                         'workletNode = z.workletNode;\n'
@@ -230,21 +286,29 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
                         'z.workletNode.connect(gainNode);\n'
                              'workletNode.port.onmessage = (e) => {\n'
                             'let {type, body} = e.data\n'
-'if (type === "bitA") {\n'
-'    updateBit1(body);\n'
+'if (type === "phase") {\n'
+ '    update("kickEnv", body);\n'
 '}\n'
 'if (type === "bit") {\n'
-'    updateBit2(body);\n'
+'    updateBit(body);\n'
 '}\n'
 
-                                'if (type === "clapEnv") {\n'
-                                    'update("clapEnv", body*0.075);\n'
+                                'if (type === "kickEnv") {\n'
+                                    'update("phase", body*0.5);\n'
                                                                    '}}});'
             '}\n'
-            'gainNode.gain.setValueAtTime(isPlaying ? 1.25 : 0, ctxt.currentTime);\n'
+                  'gainNode.gain.setValueAtTime(isPlaying ? 2.5 : 0, ctxt.currentTime);\n');
+            }
+
+            bytes memory part3;
+            {
+                part3 = abi.encodePacked(
             '}\n', // end of generate music func
-                  'const NUMERATOR = 1.0 + (', Conversion.uint2str(uint(keccak256(abi.encodePacked(tokenId))) % 100), ');\n',
-                                             'const DENOMINATOR = 102.0;\n',
+                  'const gridSize = (\"', Conversion.uint2str(uint(uint(keccak256(abi.encodePacked(tokenId))) % 100) < 50 ? 32 : 16), '.000\");\n',
+                  generateFloatVariable("crossSize", tokenId),
+                  generateIntVariable("yRate", tokenId, 100),
+
+                  generateColorScheme(tokenId),
             ICompressed(shaderWrapper).uncompress(),
             '</script>',
             '</body>',
@@ -252,7 +316,7 @@ contract ZenMetadataRenderer is IMetadataRenderer, MetadataRenderAdminCheck {
             );
             }
 
-            return string(abi.encodePacked(part1, part2));
+        return string(abi.encodePacked(part1, part2, part3));
     }
 
     function contractURI() external view returns (string memory) {

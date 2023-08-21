@@ -5,7 +5,7 @@ import './Base64.sol';
 import './Conversion.sol';
 
 library SVG {
-    function generateSVG(uint256 tokenId) public view returns (string memory) {
+    function generateSVG(uint256 tokenId, string[3] memory colorScheme) public view returns (string memory) {
 
         /*
         uint256[256] memory numbers;
@@ -56,7 +56,7 @@ library SVG {
         }
         */
         string memory svg = string(abi.encodePacked('<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%" height="100%" viewBox="0 0 1024 1024" xml:space="preserve">',
-            '<rect x="0" y="0" width="100%" height="100%" fill="black"/>',
+            '<rect x="0" y="0" width="100%" height="100%" fill="rgba(', colorScheme[0], ')"/>',
                                                     //rects,
             '</svg>'
                                                     ));
