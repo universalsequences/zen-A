@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10; 
 import "./IZoraNFTCreator.sol";
+//import './SVG.sol';
 import './Base64.sol';
 import {IERC721Drop} from "zora-drops-contracts/interfaces/IERC721Drop.sol";
 import {console} from "forge-std/console.sol";
@@ -8,7 +9,7 @@ import {ERC721Drop} from "zora-drops-contracts/ERC721Drop.sol";
 
 contract ZenDropCreator {
 
-    
+    string [] gray= ["45.0,47.0,45.0,255.0", "90.0,85.0,85.0", "20.0, 20.0, 20.0, 255.0"];
     IERC721Drop.SalesConfiguration salesConfig;
     address zporeMinterAddress;
 
@@ -20,7 +21,7 @@ contract ZenDropCreator {
 
         salesConfig = IERC721Drop.SalesConfiguration({
             publicSalePrice: 0,
-            maxSalePurchasePerAddress: 1000,
+            maxSalePurchasePerAddress: 1024,
             publicSaleStart: 0,
             publicSaleEnd: 500000000000000,
             presaleStart: 0,
@@ -42,20 +43,25 @@ contract ZenDropCreator {
                     bytes(
                         string(
                             abi.encodePacked(
-                               '{"description": "Birth of a universe", "name": "Zen A", "image": "https://zequencer.mypinata.cloud/ipfs/QmcLbLqjVxTUXFVbrVeXJPKKdXGbdr1TNHEK3ahKHzzSoF/1"}')))))));
+                                             //'{"description": "1024 eternal compositions (100% on-chain).", "name": "Bleep A", "image": "', SVG.generateSVG(1029, gray) ,'"}')))))));
+                                             '{"description": "1024 eternal compositions (100% on-chain).", "name": "Bleep A"}')))))));
 
-        // defaultAdmin will be the "ZporeMinter"
-        address ZORA_DROPS_CREATOR = address(0xEf440fbD719cC5c3dDCD33b6f9986Ab3702E97A5);
+        // new goerli version:
+        //address ZORA_DROPS_CREATOR = address(0xb9583D05Ba9ba8f7F14CCEe3Da10D2bc0A72f519);
+
+        // zora goerli network
+        address ZORA_DROPS_CREATOR = address(0xeB29A4e5b84fef428c072debA2444e93c080CE87);
         address newDropAddress = IZoraNFTCreator(ZORA_DROPS_CREATOR).setupDropsContract(
-          "Zen 123",
-          "ZEN",
+          "Bleep A",
+          "BLPA",
           address(this),
-          1000000000000, // unlimited?
+          1024, // unlimited?
           500, // BPS (what should i do for 8%?)
           payable(address(this)),
           salesConfig,
           IMetadataRenderer(metadataRenderer),
-          metadataInitializer
+          metadataInitializer,
+          address(0)
        );
 
         // return the new drop address so that Stems contract can tie the "song" to the

@@ -1,0 +1,14 @@
+
+pragma solidity ^0.8.20;
+
+contract CompressedParameterNames0 {
+    string public data;
+
+    constructor() {
+        data = "p_002457_new_time_system,p_0488be_jaki_vel_min,p_0a5267_symbol_release,p_0bb934_baseFrequency,p_0cc818_octave,p_1007ca_octave,p_1573ce_main_synth_vol,p_1958df_octave,p_197793_pulse_rate,p_1f75d5_delay_wet,p_2b30bb_resonance,p_2c3bb9_clap_vol,p_2d3a32_synth2_relaease,p_2d4f38_rotate_N,p_2f9a8b_length,p_357656_alt_velocity_depth,p_359a49_fm2_speed,p_381139_feedback,p_38b353_clap_cutoff2,p_3c9b9f_baseFmMod,p_4fb8f7_wet,p_52774b_hi_hat_vol,p_542765_bit_osc_mix,p_542c41_jaki_velocity,p_5561f6_lfo_release,p_5af8e4_full_volume,p_641398_jaki_fm,p_641876_dash_decay,p_69b6d6_length,p_6e1ac3_bit_osc_mix,p_71bf37_fm_mod,p_793e70_rotate_N,p_7e492f_str_clock_denon_mult,p_850339_fb_fm,p_853fea_clap_cutoff1,p_8a2ebd_synths_1_2_mix,p_8b96f6_clapRev,p_91869f_clap_phase,p_92c388_hh_band_cut1,p_9e9a50_modular_halftime,p_9ec6ef_fb_2,p_a0675f_trig_width,p_a8040a_numbits,p_b1ee2e_drum_fade_in,p_b9c857_numbits,p_bb4388_cutoff_env_max,p_bf834d_clap_div,p_c093b9_truncate,p_c20309_startbit,p_c4914b_glide,p_c4c731_tempo_rate,p_c6761f_startbit,p_c6ba1f_global__clock_div,p_c799db_new_system,p_c9a5d1_volumne,p_db245d_straight_clock,p_dbf8dd_trig_width,p_dedc7a_straight_kick,p_df9ca2_bit_lfo,p_dfeb10_kickvol,p_e0e4d8_reverb_bender,p_e40945_symbol_width,p_ecba8e_shift,p_f38ba8_dot_decay,p_f73974_clap_send,p_f73fd2_post_accent,p_f920c6_fm_mod,p_f9340a_claprev2,p_fe5d26_global_env_release,p_a03e81_pulse_hi_hat,p_8a8b72_clap_offseter";
+    }
+
+    function getData() public view returns  (string memory) {
+        return data;
+    }
+}

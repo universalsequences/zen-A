@@ -15,7 +15,8 @@ interface IZoraNFTCreator {
         address payable fundsRecipient,
         IERC721Drop.SalesConfiguration memory saleConfig,
         IMetadataRenderer metadataRenderer,
-        bytes memory metadataInitializer
+        bytes memory metadataInitializer,
+        address createReferral
     ) external returns (address);
 }
  
