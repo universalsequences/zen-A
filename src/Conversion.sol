@@ -5,6 +5,43 @@ pragma solidity ^0.8.20;
    Conversion library from unsigned integer to string
  */
 library Conversion {
+
+    function stringToInt(string memory s) public pure returns (int) {
+        bytes memory b = bytes(s);
+        bool negative = false;
+        uint startIndex = 0;
+
+        if (b.length == 0) {
+            revert("Empty string provided.");
+        }
+
+        if (b[0] == '-') {
+            negative = true;
+            startIndex = 1;
+        }
+
+        uint result = 0;
+        for (uint i = startIndex; i < b.length; i++) {
+            if (uint8(b[i]) >= 48 && uint8(b[i]) <= 57) {
+                result = result * 10 + (uint8(b[i]) - 48);
+
+                // Overflow check for positive numbers
+                if (!negative && result > (2**255 - 1)) {
+                    revert("Value out of range for int type.");
+                }
+
+                // Underflow check for negative numbers
+                if (negative && result > 2**255) {
+                    revert("Value out of range for int type.");
+                }
+            } else {
+                revert("Invalid character found. Only digits 0-9 and optionally '-' at the beginning allowed.");
+            }
+        }
+
+        return negative ? -int(result) : int(result);
+    }
+
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
             return "0";

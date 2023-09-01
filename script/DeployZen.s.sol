@@ -36,14 +36,23 @@ contract DeployZen is Script {
     CompressedDSP2 dsp2 = new CompressedDSP2();
     dsp = new DSP(address(dsp0),address( dsp1), address(dsp2));
     }
-    CompressedParameterNames0  names = new CompressedParameterNames0();
-    CompressedParameterValues0 values = new CompressedParameterValues0();
+    CompressedParameterNames0  parameterNames = new CompressedParameterNames0();
+    CompressedParameterValues0 parameterValues  = new CompressedParameterValues0();
     CompressedShader shader = new CompressedShader();
+
     ZenMetadataRenderer metadataRenderer = new ZenMetadataRenderer(
-                                                                   address(lib1), address(lib2), address(lib3), address(dsp), address(names), address(values), address(shader), address(colors));
+        address(lib1),
+        address(lib2),
+        address(lib3),
+        address(dsp),
+        address(parameterNames),
+        address(parameterValues),
+        address(shader),
+        address(colors));
     ZenDropCreator creator = new ZenDropCreator();
+
     address drop = creator.newDrop(address(metadataRenderer));
-    IERC721Drop(drop).purchase{value:777000000000000*32}(32);
+    IERC721Drop(drop).purchase{value:(777000000000000 + 0*7000000000000000)*128}(128);
     vm.stopBroadcast();
   }
 }
